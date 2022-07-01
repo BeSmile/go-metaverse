@@ -1,0 +1,39 @@
+definitions:
+  app.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/building/material/animals:
+    get:
+      consumes:
+      - application/json
+      description: 获取动物产出
+      operationId: get-material-land-animal
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+  /api/v1/building/material/magic:
+    post:
+      consumes:
+      - application/json
+      description: 保存魔物
+      operationId: building-material-save-magic
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+swagger: "2.0"

@@ -1,0 +1,227 @@
+{
+  "adcreative_template_id": 925,
+  "adcreative_template_name": "Banner图片 20:7",
+  "adcreative_template_description": "",
+  "adcreative_template_size": "",
+  "adcreative_template_style": "图片",
+  "adcreative_sample_image_list": [],
+  "ad_attributes": [
+    {
+      "name": "impression_tracking_url",
+      "element_type": "ELEMENT_TYPE_URL",
+      "field_type": "FIELD_TYPE_STRING",
+      "required": false,
+      "description": "请输入曝光监测URL(可选)",
+      "parent_name": "",
+      "enum_property": {
+        "default": null,
+        "enumeration": null
+      },
+      "array_property": {
+        "min_number": null,
+        "max_number": null
+      },
+      "struct_property": {
+        "element_mutual_exclusive": null
+      },
+      "restriction": {
+        "text_restriction": null,
+        "image_restriction": null,
+        "url_restriction": {
+          "url_pattern": "^https?:\\/\\/([a-zA-Z0-9\\-]+\\.)+([a-zA-Z]{2,5})([\\/\\?#][a-zA-Z0-9`~!@#%&_=;\\$\\^\\*\\(\\)\\-\\+\\{\\}\\[\\]\\:\\,\\.\\?\\/\\|]*)?$"
+        },
+        "video_restriction": null,
+        "number_restriction": null
+      }
+    },
+    {
+      "name": "click_tracking_url",
+      "element_type": "ELEMENT_TYPE_URL",
+      "field_type": "FIELD_TYPE_STRING",
+      "required": false,
+      "description": "请输入点击监测URL(可选)",
+      "parent_name": "",
+      "enum_property": {
+        "default": null,
+        "enumeration": null
+      },
+      "array_property": {
+        "min_number": null,
+        "max_number": null
+      },
+      "struct_property": {
+        "element_mutual_exclusive": null
+      },
+      "restriction": {
+        "text_restriction": null,
+        "image_restriction": null,
+        "url_restriction": {
+          "url_pattern": "^https?:\\/\\/([a-zA-Z0-9\\-]+\\.)+([a-zA-Z]{2,5})([\\/\\?#][a-zA-Z0-9`~!@#%&_=;\\$\\^\\*\\(\\)\\-\\+\\{\\}\\[\\]\\:\\,\\.\\?\\/\\|]*)?$"
+        },
+        "video_restriction": null,
+        "number_restriction": null
+      }
+    }
+  ],
+  "adcreative_attributes": [
+    {
+      "name": "deep_link_url",
+      "elementType": "ELEMENT_TYPE_URL",
+      "fieldType": "STRING",
+      "required": false,
+      "description": "应用直达(可选)",
+      "parentName": "",
+      "enumProperty": {
+        "enumeration": null,
+        "default": null
+      },
+      "arrayProperty": {
+        "minNumber": null,
+        "maxNumber": null
+      },
+      "structProperty": {
+        "elementMutualExclusive": null
+      },
+      "restriction": {
+        "textRestriction": null,
+        "imageRestriction": null,
+        "urlRestriction": {
+          "urlPattern": "^((?!https?)([a-zA-Z0-9_\\-\\.])+):\\/\\/(([a-zA-Z0-9_\\-\\?]+\\.?)+([a-zA-Z0-9`~!@#%&_=;\\$\\^\\*\\(\\)\\-\\+\\{\\}\\[\\]\\:\\,\\.\\?\\/\\|]*)?)?$"
+        },
+        "videoRestriction": null,
+        "numberRestriction": null
+      }
+    }
+  ],
+  "adcreative_elements": [
+    {
+      "name": "image",
+      "element_type": "ELEMENT_TYPE_IMAGE",
+      "field_type": "FIELD_TYPE_STRING",
+      "required": true,
+      "description": "图片",
+      "parent_name": "",
+      "enum_property": {
+        "default": null,
+        "enumeration": null
+      },
+      "array_property": {
+        "min_number": null,
+        "max_number": null
+      },
+      "struct_property": {
+        "element_mutual_exclusive": null
+      },
+      "restriction": {
+        "text_restriction": null,
+        "image_restriction": {
+          "width": 960,
+          "height": 334,
+          "file_size": 100,
+          "file_format": [
+            "IMAGE_TYPE_JPG",
+            "IMAGE_TYPE_PNG"
+          ]
+        },
+        "url_restriction": null,
+        "video_restriction": null,
+        "number_restriction": null
+      }
+    }
+  ],
+  "support_billing_spec_list": [
+    {
+      "billing_event": "BILLINGEVENT_CLICK",
+      "min_price": 10,
+      "max_price": 10000
+    },
+    {
+      "billing_event": "BILLINGEVENT_IMPRESSION",
+      "min_price": 150,
+      "max_price": 99900
+    }
+  ],
+  "support_page_type": [
+    "PAGE_TYPE_DEFAULT",
+    "PAGE_TYPE_TSA_WEB_NONE_ECOMMERCE"
+  ],
+  "landing_page_config": {
+    "required": true,
+    "support_page_type_list": [
+      {
+        "page_type": "PAGE_TYPE_YUEBAO_OFFICIAL_ACCOUNT_ARTICLE",
+        "description": "阅宝公众号(H5页, 点击唤起应用)",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_YUEBAO_QUICKAPP",
+        "description": "阅宝快应用",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_WEIMOB_PRODUCTSET",
+        "description": "微盟聚合页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_WEIMOB_PROMOTION",
+        "description": "微盟活动页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_DEFAULT",
+        "description": "默认落地页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_TSA_WEB_NONE_ECOMMERCE",
+        "description": "通过 TSA 落地页制作工具生成的非电商类网页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_YIYE_FORM",
+        "description": "一叶智能落地页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_WEIMOB_PRODUCT",
+        "description": "微盟单品页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      },
+      {
+        "page_type": "PAGE_TYPE_WEIMOB_H5",
+        "description": "微盟H5落地页",
+        "support_link_name_type": null,
+        "support_link_page_type": null
+      }
+    ]
+  },
+  "unsupport_billing_spec_list": [],
+  "unsupport_ad_attributes_spec_list": [],
+  "unsupport_adcreative_attributes_spec_list": [],
+  "unsupport_siteset_detail_spec": [],
+  "support_dynamic_ability_spec_list": {
+    "dynamic_ability_type": [
+      "DYNAMIC_TYPE_MULTIPLE_PRODUCT_AD"
+    ],
+    "product_item_display_quantity": [
+      "MULTIPLE",
+      "SINGLE"
+    ]
+  },
+  "support_bid_mode_list": [
+    "BID_MODE_CPC",
+    "BID_MODE_OCPC",
+    "BID_MODE_CPM",
+    "BID_MODE_OCPM"
+  ],
+  "unsupport_bid_mode_list": []
+}
