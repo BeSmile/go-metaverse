@@ -9,6 +9,7 @@ import (
 	"go-metaverse/handler"
 	buildingRouter "go-metaverse/router/building"
 	demoRouter "go-metaverse/router/demo"
+	"go-metaverse/router/docker"
 )
 
 func baseRouter(g *gin.RouterGroup) {
@@ -26,6 +27,8 @@ func InitDomainRouter(r *gin.Engine) *gin.RouterGroup {
 
 	initBuildingRouter(dGroup)
 
+	initDockerRouter(dGroup)
+
 	// 注册swagger路由
 	swaggerRouter(dGroup)
 
@@ -39,6 +42,15 @@ func initDemoRouter(g *gin.RouterGroup) {
 
 func initBuildingRouter(g *gin.RouterGroup) {
 	buildingRouter.InitBuildingRouter(g) // 注入demo路由
+}
+
+// 注册docker相关路由
+func initDockerRouter(g *gin.RouterGroup) {
+	dockerGroup := g.Group("/docker")
+
+	// 注册镜像路由
+	docker.RegisterDockerImageRouter(dockerGroup)
+	docker.RegisterDockerContainerRoute(dockerGroup)
 }
 
 // 配置静态资源目录

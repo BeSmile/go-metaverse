@@ -6,10 +6,12 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go-metaverse/db"
+	"go-metaverse/models/docker"
 	mgorm "go-metaverse/models/gorm"
 	"go-metaverse/router"
 	"log"
 )
+
 //
 //var (
 //	db  *gorm.DB
@@ -30,6 +32,8 @@ func main() {
 	defer db.DB.Close()
 
 	mgorm.AutoMigrate(db.DB)
+
+	docker.InitCmdBackendEnv()
 
 	//db.AutoMigrate(&User{})
 
