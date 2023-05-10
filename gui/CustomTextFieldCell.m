@@ -3,20 +3,42 @@
 @implementation CustomTextFieldCell
 
 - (NSRect)titleRectForBounds:(NSRect)theRect {
+    /* get the standard text content rectangle */
     NSRect titleFrame = [super titleRectForBounds:theRect];
 
-    CGFloat fontHeight = [[[NSLayoutManager alloc] init] defaultLineHeightForFont:self.font];
-    if (fontHeight < titleFrame.size.height) {
-//         NSLog(@"dfg%f", fontHeight);
-        titleFrame.origin.y = theRect.origin.y + (theRect.size.height - fontHeight) * 0.5f;
-        titleFrame.size.height = fontHeight;
+    /* find out how big the rendered text will be */
+    NSAttributedString *attrString = self.attributedStringValue;
+    NSRect textRect = [attrString boundingRectWithSize: titleFrame.size
+                                               options: NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin ];
+
+    /* If the height of the rendered text is less then the available height,
+     * we modify the titleRect to center the text vertically */
+    if (textRect.size.height < titleFrame.size.height) {
+        titleFrame.origin.y = theRect.origin.y + (theRect.size.height - textRect.size.height) / 2.0;
+        titleFrame.size.height = textRect.size.height;
     }
     return titleFrame;
 
 }
 
-- (void) drawInteriorWithFrame:(NSRect)cFrame inView:(NSView*)cView {
-  [super drawInteriorWithFrame:[self titleRectForBounds:cFrame] inView:cView];
+-(void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    NSAttributedString *attrString = self.attributedStringValue;
+
+    /* if your values can be attributed strings, make them white when selected */
+    if (self.isHighlighted && self.backgroundStyle==NSBackgroundStyleDark) {
+        NSMutableAttributedString *whiteString = attrString.mutableCopy;
+        [whiteString addAttribute: NSForegroundColorAttributeName
+                            value: [NSColor whiteColor]
+                            range: NSMakeRange(0, whiteString.length) ];
+        attrString = whiteString;
+    }
+
+    [attrString drawWithRect: [self titleRectForBounds:cellFrame]
+                     options: NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin];
+}
+
+-(void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView{
+  [super drawWithFrame:cellFrame inView:controlView];
 }
 
 @end
