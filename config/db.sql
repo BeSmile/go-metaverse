@@ -1,0 +1,10 @@
+-- 开始初始化数据 ;
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+BEGIN;
+
+COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;
+-- 数据完成 ;

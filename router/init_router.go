@@ -12,9 +12,5 @@ func InitRouter() *gin.Engine {
 
 	InitDomainRouter(r)
 
-	err := r.Run()
-	if err != nil {
-		return nil
-	}
 	return r
 }

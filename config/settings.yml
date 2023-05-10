@@ -1,0 +1,33 @@
+script:
+    path: ./static/scripts
+settings:
+    application:
+        domain: localhost:8002
+        host: 127.0.0.1
+        ishttps: false
+        mode: dev
+        name: ferry
+        port: "8002"
+        readtimeout: 1
+        writertimeout: 2
+    database:
+        dbtype: mysql
+        host: 127.0.0.1
+        name: gents
+        password: 123456
+        port: 3306
+        username: root
+    gorm:
+        logmode: 0
+        maxidleconn: 0
+        maxopenconn: 20000
+    jwt:
+        secret: ferry
+        timeout: 86400
+    public:
+        islocation: 0
+    redis:
+        url: redis://ferry_redis:6379
+    ssl:
+        key: keystring
+        pem: temp/pem.pem

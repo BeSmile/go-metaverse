@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -61,6 +60,5 @@ func staticFileRouter(g *gin.RouterGroup, r *gin.Engine) {
 
 // 配置swagger路由
 func swaggerRouter(g *gin.RouterGroup) {
-	fmt.Println(111)
 	g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

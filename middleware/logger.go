@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-func LoggerToFIle() gin.HandlerFunc {
+// LoggerToFile 记录文件  /**
+func LoggerToFile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
 

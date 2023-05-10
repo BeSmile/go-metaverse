@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  mysql:
+    container_name: go-mataverse-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_USERNAME: 'root'
+      MYSQL_PASS: '123456'
+    image: 'docker.io/mysql:latest'
+    restart: always
+    ports:
+      - 3306:3306
