@@ -25,10 +25,10 @@
     NSAttributedString *attrString = self.attributedStringValue;
 
     /* if your values can be attributed strings, make them white when selected */
-    if (self.isHighlighted && self.backgroundStyle==NSBackgroundStyleDark) {
+    if (self.isHighlighted && self.backgroundStyle==NSBackgroundStyleRaised) {
         NSMutableAttributedString *whiteString = attrString.mutableCopy;
         [whiteString addAttribute: NSForegroundColorAttributeName
-                            value: [NSColor whiteColor]
+                            value: [NSColor clearColor]
                             range: NSMakeRange(0, whiteString.length) ];
         attrString = whiteString;
     }
