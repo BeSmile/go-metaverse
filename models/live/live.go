@@ -54,12 +54,18 @@ func (c *Client) HeartBeat() {
 
 func (c *Client) JoinRoom(roomId string) error {
 	c.roomId = roomId
-	c.SendData(fmt.Sprintf("type@=loginreq/roomid@=%s/", roomId))
-	c.SendData(fmt.Sprintf("type@=joingroup/rid@=%s/gid@=-9999/", roomId))
+	err := c.SendData(fmt.Sprintf("type@=loginreq/roomid@=%s/", roomId))
+	if err != nil {
+		return err
+	}
+	groupErr := c.SendData(fmt.Sprintf("type@=joingroup/rid@=%s/gid@=-9999/", roomId))
+	if groupErr != nil {
+		return groupErr
+	}
 	return nil
 }
 
-func (c *Client) Watch() error {
+func (c *Client) Watch() {
 
 	for {
 		// 读取消息长度(4字节)
@@ -99,5 +105,4 @@ func (c *Client) Watch() error {
 			break
 		}
 	}
-	return nil
 }

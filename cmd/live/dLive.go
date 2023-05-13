@@ -7,7 +7,6 @@ import (
 	liveModel "go-metaverse/models/live"
 	"net"
 	"os"
-	"os/exec"
 	"time"
 )
 
@@ -32,18 +31,17 @@ func init() {
 	StartCmd.PersistentFlags().StringVarP(&port, "port", "p", "8601", "domain port")
 }
 
-func Speak(str string) {
-	return
-	cmd := exec.Command("say", "--voice=Mei-Jia", str)
-
-	//cmd := exec.Command("say", "--voice=Sin-ji", str)
-	_, err := cmd.CombinedOutput()
-	// 检查命令是否执行成功
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
+//func Speak(str string) {
+//	cmd := exec.Command("say", "--voice=Mei-Jia", str)
+//
+//	//cmd := exec.Command("say", "--voice=Sin-ji", str)
+//	_, err := cmd.CombinedOutput()
+//	// 检查命令是否执行成功
+//	if err != nil {
+//		fmt.Println(err)
+//		return
+//	}
+//}
 
 func run() {
 	dmApp := gui.NewClient()
@@ -71,7 +69,7 @@ func run() {
 			}
 			fmt.Printf("%s(lv.%s): %s\n", chatMsg.Nn, chatMsg.Level, chatMsg.Txt)
 			dmApp.NewChatMessage(chatMsg)
-			Speak(fmt.Sprintf("%s", chatMsg.Txt))
+			liveModel.Speak(fmt.Sprintf("%s", chatMsg.Txt))
 		}
 
 		userEnterMsgHandler := func(_ string, message liveModel.Message) {
@@ -81,7 +79,7 @@ func run() {
 			}
 			uEnter.Txt = fmt.Sprintf("欢迎%s进入直播间", uEnter.Nn)
 			dmApp.NewUEnterMessage(uEnter)
-			Speak(uEnter.Txt)
+			liveModel.Speak(uEnter.Txt)
 
 		}
 		spbcMsgHandler := func(_ string, message liveModel.Message) {
@@ -89,14 +87,14 @@ func run() {
 			if !ok {
 				fmt.Println("类型转换失败", ok)
 			}
-			Speak(fmt.Sprintf("感谢%s送出的%s", spbcMsg.Sn, spbcMsg.Gn))
+			liveModel.Speak(fmt.Sprintf("感谢%s送出的%s", spbcMsg.Sn, spbcMsg.Gn))
 		}
 		dgbMsgHandler := func(_ string, message liveModel.Message) {
 			dgbMsg, ok := message.(liveModel.DgbMessage)
 			if !ok {
 				fmt.Println("类型转换失败", ok)
 			}
-			Speak(fmt.Sprintf("感谢%s送出的礼物", dgbMsg.Nn))
+			liveModel.Speak(fmt.Sprintf("感谢%s送出的礼物", dgbMsg.Nn))
 		}
 		go client.AddEventListener(liveModel.UEnterType, userEnterMsgHandler)
 		go client.AddEventListener(liveModel.ChatMsgType, chatMsgHandler)
@@ -106,16 +104,19 @@ func run() {
 		fmt.Println("Connect Success")
 		go client.HeartBeat()
 		// 橙子
-		client.JoinRoom("4549169")
+		//client.JoinRoom("4549169")
 		//client.JoinRoom("557171")
+		// 冷狗
+		client.JoinRoom("3125893")
 		//client.JoinRoom("8014243")
 		//client.JoinRoom("11578607")
 		//client.JoinRoom("99999")
 		// 乐乐直播间
 		//client.JoinRoom("414194")
+		// 刀 | 冷
 		//client.JoinRoom("5103806")
 
-		client.Watch()
+		go client.Watch()
 	}()
 	dmApp.Init()
 
@@ -123,5 +124,5 @@ func run() {
 }
 
 func main() {
-	fmt.Println("233")
+	run()
 }
