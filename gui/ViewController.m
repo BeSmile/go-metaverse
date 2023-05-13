@@ -50,20 +50,12 @@ static char MyObservationContext;
 
     GlobalVars *globals = [GlobalVars sharedInstance];
 
-    NSScrollView *scrollView = globals.scrollView;
-    // 设置滚动样式
-//     scrollView.scrollerStyle = NSScrollerKnobStyleDefault;
-    scrollView.frame = self.view.bounds;
     _tableView = [[NSTableView alloc]initWithFrame:self.view.bounds];
     
     [_tableView setBackgroundColor:[NSColor clearColor]];
 //     [_tableView setUsesAlternatingRowBackgroundColors:YES];
     [_tableView setGridColor:[NSColor clearColor]];
 //    [_tableView setPreservesSelection:@NO];
-    
-    scrollView.backgroundColor = _tableView.backgroundColor;
-//     _tableView.style = NSTableViewStylePlain;
-    scrollView.drawsBackground = NO;
 
 //     [_tableView setContentInset:NSMakeSize(0, 0)];
     [[_tableView enclosingScrollView] setDrawsBackground:NO];
@@ -86,31 +78,11 @@ static char MyObservationContext;
 
     _tableView.delegate = self;
     _tableView.dataSource = self;
-//     [_tableView reloadData];
 
-    self.view = scrollView;
-//     self.tableView = _tableView;
-
-    [scrollView setDocumentView:_tableView];
+    [self.view addSubview:_tableView];
 }
 
 #pragma mark - KVO
-
-//- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context;{
-//NSLog(@"监听字段:%s", keyPath);
-//    if ([keyPath isEqualToString:@"dataArray"]) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            NSInteger index = self.dataArray.count - 1;
-//            NSLog(@"%d", index);
-//            if (index >= 0) {
-//                [self.tableView beginUpdates];
-//                [self.tableView insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:index] withAnimation:NSTableViewAnimationSlideDown];
-//                [self.tableView endUpdates];
-//            }
-//        });
-//    }
-//}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     //  Check if our class, rather than superclass or someone else, added as observer
@@ -147,6 +119,8 @@ static char MyObservationContext;
 
 -(void)loadView {
 	self.view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 360)];
+    [self.view removeConstraints:self.view.constraints];
+
 }
 
 -(id)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger) row {
@@ -215,50 +189,6 @@ static char MyObservationContext;
         // 如果是数据行，设置其高度为 40
         return 60;
     }
-}
-
-- (void)loadData {
-    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-
-    [queue addOperationWithBlock:^{
-        while (true) {
-            // 模拟更新数据源过程，假设每秒更新一次
-//             [NSThread sleepForTimeInterval:1];
-
-            // 每秒更新一次数据源
-//             NSString newData = [[NSDate date] descriptionWithLocale:[NSLocale currentLocale]];
-//             [self.dataSource addObject:newData];
-
-            // 使用主线程更新 table view
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                
-                
-//                NSIndexSet *indexSetToInsert = [NSIndexSet indexSetWithIndex:self.dataArray.count - 1];
-//                if(self.total >= 6) {
-//
-//                    NSIndexSet *indexSetToDelete = [NSIndexSet indexSetWithIndex:0];
-//                    [_tableView beginUpdates];
-//
-//                    // NSTableViewAnimationEffectNone
-//                    [_tableView removeRowsAtIndexes:indexSetToDelete withAnimation:NSTableViewAnimationEffectFade];
-//                    [_tableView endUpdates]; // 结束动画代码块
-//
-//                }
-//                [_tableView beginUpdates];
-//                [_tableView insertRowsAtIndexes:indexSetToInsert withAnimation:NSTableViewAnimationSlideUp];// NSTableViewAnimationSlideUp  NSTableViewAnimationSlideRight
-//                // 使用 beginUpdates 和 endUpdates 的方式更新 table view
-//                [_tableView endUpdates];
-                [_tableView reloadData];
-//
-//                 [_tableView beginUpdates];
-////
-// 				NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, _dataArray.count)];
-// 				[_tableView reloadSections:indexSet];
-////
-//                 [_tableView endUpdates];
-            }];
-        }
-    }];
 }
 
 - (void)dealloc

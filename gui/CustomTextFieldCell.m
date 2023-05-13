@@ -22,6 +22,9 @@
 }
 
 -(void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    [[NSColor clearColor] set];
+    NSRectFill(cellFrame); // 清除绘制区域
+    
     NSAttributedString *attrString = self.attributedStringValue;
 
     /* if your values can be attributed strings, make them white when selected */
