@@ -157,10 +157,15 @@ static char MyObservationContext;
     // 获取表格列的标识符
     NSString *identifier = [tableColumn identifier];
     if ([kImageColumnIdentifier isEqualToString:identifier]) {
-        NSView *imageView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 36, 64)];
+        NSString *avatar = n-> AVATAR;
+       
+        NSView *imageView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 36, 60)];
+        if( [avatar isEqualToString:@""]) {
+            return imageView;
+        }
         // 如果是第一列，创建并返回一个 NSImageView
         NSImageView *avatarImageView = [[NSImageView alloc] initWithFrame:NSMakeRect(0, (imageView.frame.size.height - 36) / 2, 36, 36)];
-        avatarImageView.image = [[NSImage alloc]initWithContentsOfURL:[NSURL URLWithString:n-> AVATAR]];
+        avatarImageView.image = [[NSImage alloc]initWithContentsOfURL:[NSURL URLWithString:avatar]];
 //         avatarImageView.imageScaling =   NSImageScaleNone;
         avatarImageView.wantsLayer = YES;
         avatarImageView.layer.masksToBounds = YES;
