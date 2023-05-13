@@ -107,10 +107,10 @@ func run() {
 		//client.JoinRoom("4549169")
 		//client.JoinRoom("557171")
 		// 冷狗
-		client.JoinRoom("3125893")
+		//client.JoinRoom("3125893")
 		//client.JoinRoom("8014243")
 		//client.JoinRoom("11578607")
-		//client.JoinRoom("99999")
+		client.JoinRoom("99999")
 		// 乐乐直播间
 		//client.JoinRoom("414194")
 		// 刀 | 冷

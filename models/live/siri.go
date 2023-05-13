@@ -28,7 +28,6 @@ func init() {
 			}
 		}
 	}()
-	fmt.Println("yhaha")
 }
 
 func Speak(str string) {
