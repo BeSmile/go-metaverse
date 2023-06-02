@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"go-metaverse/models/live"
+	mLive "go-metaverse/models/live/models"
 )
 
 /*
@@ -14,11 +14,11 @@ import "C"
 type DanMuClient struct {
 }
 
-func (dm *DanMuClient) NewChatMessage(message live.ChatMsgMessage) {
+func (dm *DanMuClient) NewChatMessage(message mLive.ChatMsgMessage) {
 	C.InitDataSource(C.CString(message.Ic), C.CString(message.Nn), C.CString(message.Txt), C.CString(string(message.Type)))
 }
 
-func (dm *DanMuClient) NewUEnterMessage(message live.UenterMessage) {
+func (dm *DanMuClient) NewUEnterMessage(message mLive.UenterMessage) {
 	C.InitDataSource(C.CString(message.Ic), C.CString(message.Nn), C.CString(message.Txt), C.CString(string(message.Type)))
 }
 

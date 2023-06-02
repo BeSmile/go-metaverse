@@ -1,6 +1,13 @@
-package live
+package constants
 
 type MsgType string
+
+const AvatarDomain string = "https://apic.douyucdn.cn/upload"
+
+const (
+	BiLiBiLi = "bilibili"
+	DouYu    = "douyu"
+)
 
 const (
 	ChatMsgType      MsgType = "chatmsg"

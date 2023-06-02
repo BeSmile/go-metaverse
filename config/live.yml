@@ -1,0 +1,11 @@
+platforms:
+    douyu:
+        port: 8601
+        domain: danmuproxy.douyu.com
+    bilibili:
+        port: 2243
+        domain: broadcastlv.chat.bilibili.com
+        wss_port: 443
+        ws_port: 2244
+time:
+    heart: 45

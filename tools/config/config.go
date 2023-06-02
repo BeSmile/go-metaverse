@@ -11,6 +11,9 @@ import (
 var (
 	cfgDatabase  *viper.Viper
 	cfgApplition *viper.Viper
+
+	cfgDouyuLive    *viper.Viper
+	cfgBiLiBiLiLive *viper.Viper
 )
 
 func ConfigSetup(path string) {
@@ -39,4 +42,26 @@ func SetConfig(configPath string, key string, value interface{}) error {
 	viper.AddConfigPath(configPath)
 	viper.Set(key, value)
 	return viper.WriteConfig()
+}
+
+func ConfigLiveSetup(path string) {
+	viper.SetConfigFile(path)
+
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Println("Read config file failed")
+	}
+
+	err = viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(content))))
+
+	if err != nil {
+		fmt.Println("Parse config file failed")
+	}
+
+	cfgDouyuLive = viper.Sub("platforms.douyu")
+	DouyuConfig = InitDouYuConfig(cfgDouyuLive)
+
+	cfgBiLiBiLiLive = viper.Sub("platforms.bilibili")
+	BiLiBiLiConfig = InitBiliBiLiConfig(cfgBiLiBiLiLive)
+
 }

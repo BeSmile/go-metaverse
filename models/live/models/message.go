@@ -1,18 +1,17 @@
-package live
+package models
 
 import (
-	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"sync"
+	"go-metaverse/models/live/constants"
+	"go-metaverse/models/live/utils"
 )
 
 type Base struct {
 	// 房间 id
 	Rid string `json:"rid"`
 	// 弹幕组 id
-	Gid  string  `json:"gid"`
-	Type MsgType `json:"type"`
-	Sahf string  `json:"sahf"`
+	Gid  string            `json:"gid"`
+	Type constants.MsgType `json:"type"`
+	Sahf string            `json:"sahf"`
 }
 
 type UserInfo struct {
@@ -46,7 +45,7 @@ type DgbMessage struct {
 	Bg string `json:"bg"`
 }
 
-func (d DgbMessage) GetType() MsgType {
+func (d DgbMessage) GetType() constants.MsgType {
 	return d.Base.Type
 }
 
@@ -70,13 +69,15 @@ type ChatMsgMessage struct {
 	Cmt string `json:"cmt"`
 	// nc 贵族弹幕标识,0-非贵族弹幕,1-贵族弹幕,默认值 0
 	Nc string `json:"nc"`
+	// 客户端, 默认0 网页, 1 安卓 2 ios
+	Ct string `json:"ct"`
 }
 
-func (c ChatMsgMessage) GetType() MsgType {
+func (c ChatMsgMessage) GetType() constants.MsgType {
 	return c.Base.Type
 }
 
-func (c *ChatMsgMessage) SerializeData(response Response) {
+func (c *ChatMsgMessage) SerializeData(response utils.Response) {
 	//msgType := GetMsgTypeReflect(response["type"])
 
 	//c.Base.Type = msgType
@@ -89,7 +90,7 @@ type UenterMessage struct {
 	Txt string `json:"txt"`
 }
 
-func (u UenterMessage) GetType() MsgType {
+func (u UenterMessage) GetType() constants.MsgType {
 	return u.Base.Type
 }
 
@@ -120,7 +121,7 @@ type RankListMessage struct {
 	ListDay List `json:"list_day"`
 }
 
-func (r RankListMessage) GetType() MsgType {
+func (r RankListMessage) GetType() constants.MsgType {
 	return r.Base.Type
 }
 
@@ -141,7 +142,7 @@ type SsdMessage struct {
 	Jmptp string `json:"jmptp"`
 }
 
-func (s SsdMessage) GetType() MsgType {
+func (s SsdMessage) GetType() constants.MsgType {
 	return s.Base.Type
 }
 
@@ -170,7 +171,7 @@ type SpbcMessage struct {
 	Cl2 string `json:"cl2"`
 }
 
-func (s SpbcMessage) GetType() MsgType {
+func (s SpbcMessage) GetType() constants.MsgType {
 	return s.Base.Type
 }
 
@@ -179,7 +180,7 @@ type GgbbMessage struct {
 	Base
 }
 
-func (g GgbbMessage) GetType() MsgType {
+func (g GgbbMessage) GetType() constants.MsgType {
 	return g.Base.Type
 }
 
@@ -188,7 +189,7 @@ type RankUpMessage struct {
 	Base
 }
 
-func (r RankUpMessage) GetType() MsgType {
+func (r RankUpMessage) GetType() constants.MsgType {
 	return r.Base.Type
 }
 
@@ -224,154 +225,15 @@ type FrankMessage struct {
 	} `json:"list"`
 }
 
-func (f FrankMessage) GetType() MsgType {
+func (f FrankMessage) GetType() constants.MsgType {
 	return f.Base.Type
 }
 
 type Message interface {
-	GetType() MsgType
+	GetType() constants.MsgType
 	//SerializeData(val interface{})
 }
 
 //func (m Message) GetType () MsgType {
 //	return m.Type
 //}
-
-type Event struct {
-	name string
-	data interface{}
-}
-
-type Observer interface {
-	notify(Event)
-}
-
-type Publisher struct {
-	observers map[MsgType][]chan Message
-	mu        sync.RWMutex
-}
-
-func NewPublisher() *Publisher {
-	pb := &Publisher{}
-	pb.observers = make(map[MsgType][]chan Message)
-	return pb
-}
-
-func (p *Publisher) Subscribe(topic MsgType, ch chan Message) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.observers[topic] = append(p.observers[topic], ch)
-}
-
-//func (p *Publisher) RemoveObserver(o Observer) {
-//	p.mu.Lock()
-//	defer p.mu.Unlock()
-//	if p.observers != nil {
-//		delete(p.observers, o)
-//	}
-//}
-
-func (p *Publisher) Publish(topic MsgType, msg Message) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	for _, ch := range p.observers[topic] {
-		//go o.notify(e)
-		ch <- msg
-	}
-}
-
-func (p *Publisher) AddEventListener(topic MsgType, consumer func(name string, msg Message)) {
-	if p.observers[topic] != nil {
-		for i, ch := range p.observers[topic] {
-			for data := range ch {
-				consumer(fmt.Sprintf("channal:%d", i), data)
-			}
-		}
-	}
-}
-
-type LoggingObserver struct{}
-
-func (l *LoggingObserver) notify(e Event) {
-	fmt.Printf("Logged event %s: %v\\n", e.name, e.data)
-}
-
-func (p *Publisher) MessageHandle(message string) {
-	mappingData := ParseMsg(message)
-	var msg Message
-
-	mtype := mappingData["type"]
-	if mtype == nil {
-		return
-	}
-	msgType := GetMsgTypeReflect(mappingData["type"])
-
-	userInfo := UserInfo{}
-	if err := mapstructure.Decode(mappingData, &userInfo); err != nil {
-		fmt.Println(err, "error")
-	}
-	userInfo.Ic = GetDomainAvatar(userInfo.Ic)
-
-	base := Base{}
-	if err := mapstructure.Decode(mappingData, &base); err != nil {
-		fmt.Println(err, "error")
-	}
-	switch msgType {
-	case ChatMsgType:
-		chatMsg := ChatMsgMessage{}
-		if err := mapstructure.Decode(mappingData, &chatMsg); err != nil {
-			fmt.Println("解析chatMsg", err)
-		}
-		chatMsg.UserInfo = userInfo
-		chatMsg.Base = base
-		fmt.Println(message)
-		//fmt.Println("消息数据: ",mappingData)
-		msg = Message(chatMsg)
-		break
-
-	case UEnterType:
-		uEnter := UenterMessage{}
-		uEnter.UserInfo = userInfo
-		uEnter.Base = base
-		msg = Message(uEnter)
-		break
-
-	case DgbType:
-		dgbMessage := DgbMessage{}
-		if err := mapstructure.Decode(mappingData, &dgbMessage); err != nil {
-			fmt.Println("解析chatMsg", err)
-		}
-		dgbMessage.UserInfo = userInfo
-		dgbMessage.Base = base
-		msg = Message(dgbMessage)
-		break
-	case SpbcType:
-		spbcMessage := SpbcMessage{}
-		if err := mapstructure.Decode(mappingData, &spbcMessage); err != nil {
-			fmt.Println("解析chatMsg", err)
-		}
-		msg = Message(spbcMessage)
-		break
-	case GgbbType:
-	case RankListType:
-	case RankUpType:
-	case SsdType:
-		break
-	case NobleNumInfoType:
-	case FrankType:
-		//message := Message{}
-		//if err := mapstructure.Decode(mappingData, &message); err != nil {
-		//	fmt.Println(err)
-		//}
-		////fmt.Println(message, "message")
-		//p.Publish(message.GetType(), message)
-		break
-	default:
-		//fmt.Println("todo接收消息内容:", mappingData)
-		break
-	}
-	if msg != nil {
-
-		p.Publish(msg.GetType(), msg)
-	}
-}

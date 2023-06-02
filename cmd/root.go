@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"go-metaverse/cmd/api"
 	"go-metaverse/cmd/live"
+	liveHelper "go-metaverse/cmd/live-helper"
 	"go-metaverse/cmd/migrate"
 	"os"
 )
@@ -40,6 +41,7 @@ func init() {
 	rootCmd.AddCommand(api.StartCmd)
 	rootCmd.AddCommand(migrate.StartCmd)
 	rootCmd.AddCommand(live.StartCmd)
+	rootCmd.AddCommand(liveHelper.StartCmd)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
