@@ -22,7 +22,8 @@ type UserInfo struct {
 	// 用户等级
 	Level string `json:"level"`
 	// 贵族等级
-	Nl string `json:"nl"`
+	Nl  string `json:"nl"`
+	UId string `json:"uid"`
 }
 
 type NobleNumInfoMessage struct {

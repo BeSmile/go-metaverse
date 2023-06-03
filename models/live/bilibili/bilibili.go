@@ -11,6 +11,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/andybalholm/brotli"
+	"github.com/dlclark/regexp2"
+	"go-metaverse/models/live/bilibili/message"
+	"go-metaverse/models/live/constants"
 	"go-metaverse/models/live/models"
 	"go-metaverse/models/live/utils"
 	"io"
@@ -28,9 +31,9 @@ type AuthParams struct {
 	Protover int    `json:"protover"`
 	Platform string `json:"platform"`
 	// 默认2
-	Type      int    `json:"type"`
-	Key       string `json:"key"`
-	ClientVer string `json:"clientver"`
+	Type int    `json:"type"`
+	Key  string `json:"key"`
+	//ClientVer string `json:"clientver"`
 }
 
 type HostList struct {
@@ -76,15 +79,12 @@ OP_AUTH_REPLY	8	服务器收到鉴权包后的回复
 tcp传输数据为大端对齐
 */
 func Encode(wsData string, msgType string) []byte {
-	packetLen := int32(len(wsData) + 16)       // 需要计算body的长度加上header的固定长度, header的长度固定16
-	lenByte := utils.IntToBytes(packetLen, "") // 4个
-	//fmt.Println("packet", lenByte)
+	packetLen := int32(len(wsData) + 16)            // 需要计算body的长度加上header的固定长度, header的长度固定16
+	lenByte := utils.IntToBytes(packetLen, "")      // 4个
 	headerByte := utils.Int16ToBytes(int16(16), "") // 2个
-	//fmt.Println("header", headerByte)
 	//如果Version=0，Body中就是实际发送的数据。
 	//如果Version=2，Body中是经过压缩后的数据，请使用zlib解压，然后按照Proto协议去解析。
 	versionByte := utils.Int16ToBytes(int16(1), "") // 2个
-	//fmt.Println("ver", versionByte)
 	var op int
 	switch msgType {
 	// OP_AUTH	7	客户端发送的鉴权包(客户端发送的第一个包)
@@ -97,11 +97,8 @@ func Encode(wsData string, msgType string) []byte {
 		break
 	}
 	opByte := utils.IntToBytes(int32(op), "") // 4个
-	//fmt.Println("op", opByte)
 	seqByte := utils.IntToBytes(int32(1), "") // 4个
-	//fmt.Println("seq", seqByte)
 	msgByte := []byte(wsData)
-	//fmt.Println(msgByte, "msgByte")
 	data := bytes.Join([][]byte{lenByte, headerByte, versionByte, opByte, seqByte, msgByte}, []byte(""))
 	return data
 }
@@ -200,6 +197,7 @@ func NewPacketFromBytes(data []byte) Packet {
 	return packet
 }
 
+// Slice 一条数据可能存在多个消息体,所以分割下多条
 func Slice(data []byte) []Packet {
 	var packets []Packet
 	total := len(data)
@@ -225,7 +223,6 @@ func (p Packet) Parse() []Packet {
 		fallthrough
 		// 不处理
 	case Plain:
-		fmt.Println("body", string(p.Body))
 		return []Packet{p}
 	// Version=2时，zlib压缩后的body格式可能包含多个完整的proto包（可以理解为递归）。
 	case Zlib:
@@ -274,14 +271,151 @@ func (c *Client) Watch() {
 		}
 		intactBytes := bytes.Join([][]byte{readLengthByte, packetBody}, []byte(""))
 		// 小于16个字节.表示没内容
-		if len(intactBytes) < 16 {
-			fmt.Println("长度不够跳过, 生成string", intactBytes, readLengthByte)
+		if len(intactBytes) < 16 || len(intactBytes) > 20480 {
+			//fmt.Println("长度不够跳过, 生成string", intactBytes, readLengthByte)
 			continue
 		}
 		for _, pk := range DecodePacket(intactBytes).Parse() {
-			fmt.Printf("协议版本号:%v, 操作符: %v\n", pk.ProtoVersion, pk.Operation)
-			fmt.Println(string(pk.Body))
+
+			c.Handle(pk)
 		}
+	}
+}
+
+const (
+	_ = iota
+	_
+	HEART_BEAT
+	HEART_BEAT_RESPONSE
+	_
+	// NOTICE 弹幕、广播等全部信息
+	NOTICE
+	_
+	// JOIN_ROOM 进房
+	JOIN_ROOM
+	// WELCOME 进房通知
+	ENTER_ROOM_RESPONSE
+)
+
+const (
+	// 弹幕消息
+	DANMU_MSG = "DANMU_MSG"
+	// ENTRY_EFFECT {"cmd":"ENTRY_EFFECT","data":{"id":135,"uid":1970739762,"target_id":381245965,"mock_effect":0,"face":"https://i0.hdslb.com/bfs/face/member/noface.jpg","privilege_type":0,"copy_writing":"欢迎 \u003c%bili_56...%\u003e 直播间","copy_color":"#000000","highlight_color":"#FFF100","priority":1,"basemap_url":"https://i0.hdslb.com/bfs/live/mlive/da6933ea70f31c4df63f4b68b735891284888357.png","show_avatar":1,"effective_time":1,"web_basemap_url":"https:0.hdslb.com/bfs/live/mlive/da6933ea70f31c4df63f4b68b735891284888357.png","web_effective_time":2,"web_effect_close":0,"web_close_time":900,"business":3,"copy_writing_v2":"欢迎 \u003c^icon^\u003e \u003c%bili_5…%\u003e 进入直播间","st":[1],"max_delay_time":7,"trigger_time":1685699415328175480,"identities":22,"effect_silent_time":0,"effective_time_new":0,"web_dynamic_url_webp":"","web_dynamic_url_apng":"","mobile_dynamic_url_webp":""}}
+	ENTRY_EFFECT = "ENTRY_EFFECT"
+	// 欢迎房管
+	WELCOME_GUARD = "WELCOME_GUARD"
+	// 欢迎xxx进入房间
+	WELCOME = "WELCOME_GUARD"
+	// 在某一用户第一次进入直播间时会发送一条消息，用户退出直播间约十分钟之后，再次进入才会再次发送消息
+	INTERACT_WORD = "INTERACT_WORD"
+	// 多少人看过
+	WATCHED_CHANGE = "WATCHED_CHANGE"
+
+	// sc
+	SUPER_CHAT_MESSAGE     = "SUPER_CHAT_MESSAGE"
+	SUPER_CHAT_MESSAGE_JPN = "SUPER_CHAT_MESSAGE_JPN"
+
+	// 高能榜数量
+	ONLINE_RANK_COUNT    = "ONLINE_RANK_COUNT"
+	ONLINE_RANK_COUNT_V2 = "ONLINE_RANK_COUNT_V2"
+	STOP_LIVE_ROOM_LIST  = "STOP_LIVE_ROOM_LIST"
+	// 点赞
+	LINK_INFO_V3_UPDATE = "LINK_INFO_V3_UPDATE"
+	LIKE_INFO_V3_UPDATE = "LIKE_INFO_V3_UPDATE"
+)
+
+const (
+	// 投喂礼物
+	SEND_GIFT = "SEND_GIFT"
+	// 连击礼物
+	// COMBO_SEND {"cmd":"COMBO_SEND","data":{"action":"投喂","batch_combo_id":"batch:gift:combo_id:4668669:381245965:31039:1685699397.2412","batch_combo_num":10,"combo_id":"gift:combo_id:4668669:381245965:31039:1685699397.2402","combo_m":10,"combo_total_coin":1000,"dmscore":64,"gift_id":31039,"gift_name":"牛哇牛哇","gift_num":0,"is_join_receiver":false,"is_naming":false,"is_show":1,"medal_info":{"anchor_roomid":0,"anchor_uname":"","guard_level":0,"icon_id":0,"ighted":0,"medal_color":1725515,"medal_color_border":12632256,"medal_color_end":12632256,"medal_color_start":12632256,"medal_level":22,"medal_name":"PuFF","special":"","target_id":1526101},"name_color":"","r_uname":"泰莉亚子","ree_user_info":{"uid":381245965,"uname":"泰莉亚子"},"ruid":381245965,"send_master":null,"total_num":10,"uid":4668669,"uname":"挽留下落"}}
+	COMBO_SEND = "COMBO_SEND"
+)
+
+const (
+	// 上舰长
+	GUARD_BUY = "GUARD_BUY"
+	// 续费了舰长
+	USER_TOAST_MSG = "USER_TOAST_MSG"
+	// 在本房间续费了舰长
+	NOTICE_MSG = "NOTICE_MSG"
+)
+
+const (
+	// 小时榜变动
+	ACTIVITY_BANNER_UPDATE_V2 = "ACTIVITY_BANNER_UPDATE_V2"
+	ONLINE_RANK_V2            = "ONLINE_RANK_V2"
+)
+
+const (
+	// 粉丝关注变动  {"cmd":"ROOM_REAL_TIME_MESSAGE_UPDATE","data":{"roomid":22091661,"fans":116755,"red_notice":-1,"fans_club":42}}
+	ROOM_REAL_TIME_MESSAGE_UPDATE = "ROOM_REAL_TIME_MESSAGE_UPDATE"
+)
+
+func ParseCmd(body []byte) string {
+
+	reg, _ := regexp2.Compile(`(?<={"cmd":")[A-Z_0-9]+`, 0)
+
+	cmd, err := reg.FindStringMatch(string(body))
+	if err != nil {
+		fmt.Println("CMD错误", err)
+		return ""
+	}
+
+	return cmd.String()
+}
+
+func (c *Client) Handle(pkt Packet) {
+	switch pkt.Operation {
+	case NOTICE:
+		//var notice Notice
+		//json.Unmarshal(pkt.Body, &notice)
+		CMD := ParseCmd(pkt.Body)
+		switch CMD {
+		case string(LINK_INFO_V3_UPDATE):
+			lu := new(message.LinkUp)
+			lu.Parse(pkt.Body)
+		case string(LIKE_INFO_V3_UPDATE):
+			lu := new(message.LikeUp)
+			lu.Parse(pkt.Body)
+		case string(DANMU_MSG):
+			dm := new(message.DanMu)
+			dm.Parse(pkt.Body)
+			base := models.Base{
+				Rid:  string(rune(c.roomId)),
+				Type: constants.ChatMsgType,
+			}
+			chatMsg := models.ChatMsgMessage{
+				Base:     base,
+				UserInfo: dm.UserInfo,
+				Txt:      dm.Extra.Content,
+			}
+			fmt.Println(chatMsg)
+			c.publish.Publish(chatMsg.GetType(), chatMsg)
+		case string(INTERACT_WORD):
+			iw := new(message.InteractWord)
+			iw.Parse(pkt.Body)
+		case string(WATCHED_CHANGE):
+			iw := new(message.WatchedChange)
+			iw.Parse(pkt.Body)
+		case string(SEND_GIFT):
+			gift := new(message.Gift)
+			gift.Parse(pkt.Body)
+		case string(ONLINE_RANK_COUNT):
+			iw := new(message.OnlineRankCount)
+			iw.Parse(pkt.Body)
+		case string(ONLINE_RANK_COUNT_V2):
+		case string(ONLINE_RANK_V2):
+		case string(STOP_LIVE_ROOM_LIST):
+		default:
+			fmt.Println(CMD, string(pkt.Body))
+
+		}
+		break
+	case HEART_BEAT_RESPONSE:
+	case ENTER_ROOM_RESPONSE:
+	default:
+		fmt.Println("unknown Operation")
 	}
 }
 
@@ -327,31 +461,39 @@ func NewClient(domain string, port string) *Client {
 		port:   port,
 	}
 	client.publish = models.NewPublisher()
+	client.publish.AddMessageHandle(MessageHandle)
 	return client
+}
+
+// 对消息信息结构
+func MessageHandle(p *models.Publisher, message string) {
+	fmt.Println(message)
 }
 
 // JoinRoom
 // https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=27848294 获取key以及登录token
 func (c *Client) JoinRoom(roomId int) error {
-	resp, err := http.Get(fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%s", roomId))
+	resp, err := http.Get(fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d", roomId))
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(resp.Body, "resp")
 	var response Response
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(response.Data.Token)
 	// 获取token
 	c.roomId = roomId
 	auth := &AuthParams{
-		Roomid:    c.roomId,
-		Uid:       0,
-		Protover:  3,
-		Type:      2,
-		Platform:  "web",
-		Key:       response.Data.Token,
-		ClientVer: "1.14.3",
+		Roomid:   c.roomId,
+		Uid:      0,
+		Protover: 3,
+		Type:     2,
+		Platform: "web",
+		Key:      response.Data.Token,
+		//ClientVer: "1.16.3",
 	}
 	data, err := json.Marshal(auth)
 	if err != nil {
@@ -369,7 +511,7 @@ func (c *Client) SendData(bytesData []byte) error {
 	_, err := c.Conn.Write(bytesData)
 	if err != nil {
 		if err == io.EOF {
-			log.Panicln("Connection closed by remote side!")
+			log.Panicln("Connection closed by remote side!", err)
 		} else {
 			log.Panicln("出错了")
 		}

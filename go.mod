@@ -26,6 +26,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20230512205701-c5692af2b095 // indirect
 	github.com/chromedp/chromedp v0.9.1 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -66,6 +67,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	golang.org/dl v0.0.0-20230502172222-5216546bad51 // indirect
 	golang.org/x/net v0.9.0 // indirect
