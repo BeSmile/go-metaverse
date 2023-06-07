@@ -2,7 +2,8 @@ package message
 
 import (
 	"encoding/json"
-	"github.com/thedevsaddam/gojsonq/v2"
+	"github.com/tidwall/gjson"
+	"go-metaverse/tools/bytes"
 )
 
 type WatchedChange struct {
@@ -12,7 +13,7 @@ type WatchedChange struct {
 }
 
 func (wc *WatchedChange) Parse(body []byte) {
-	data := gojsonq.New().FromString(string(body)).Find("data")
+	data := gjson.Parse(bytes.BytesToString(body)).String()
 	jsonData, _ := json.Marshal(data)
 	json.Unmarshal(jsonData, &wc)
 }

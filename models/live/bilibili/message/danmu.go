@@ -2,7 +2,6 @@ package message
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/tidwall/gjson"
 	"go-metaverse/models/live/models"
 	"go-metaverse/tools/bytes"
@@ -70,8 +69,6 @@ func (dm *DanMu) Parse(body []byte) {
 	userInfo.UId = info.Get("2.0").String()
 	userInfo.Nn = info.Get("2.1").String()
 	userInfo.Level = info.Get("4.1").String()
-	//fmt.Println(dm.Extra)
-	fmt.Println("extra", extra.Content)
 	dm.Extra = &extra
 	dm.UserInfo = userInfo
 	dm.Emoticon = &emo

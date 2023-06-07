@@ -34,8 +34,6 @@ func run() {
 
 	config2.ConfigLiveSetup(config)
 
-	fmt.Println(config2.BiLiBiLiConfig.Domain)
-
 	dmApp := gui.NewClient()
 
 	go func() {
@@ -60,7 +58,6 @@ func run() {
 			if !ok {
 				fmt.Println("类型转换失败", ok)
 			}
-			fmt.Printf("%s(lv.%s): %s\n", chatMsg.Nn, chatMsg.Level, chatMsg.Txt)
 			dmApp.NewChatMessage(chatMsg)
 			utils.Speak(fmt.Sprintf("%s", chatMsg.Txt))
 		}
@@ -96,6 +93,7 @@ func run() {
 		//client.JoinRoom("12235923")
 		// b站房间号
 		//client.JoinRoom("27848294")
+		// 撸sir
 		client.JoinRoom(13233348)
 		client.HeartBeat()
 		client.Watch()

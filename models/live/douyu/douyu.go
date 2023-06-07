@@ -116,8 +116,8 @@ func (c *Client) HeartBeat() {
 	}
 }
 
-func (c *Client) JoinRoom(roomId int) error {
-	c.roomId = strconv.Itoa(roomId)
+func (c *Client) JoinRoom(roomId int32) error {
+	c.roomId = strconv.Itoa(int(roomId))
 	err := c.SendData(Encode(fmt.Sprintf("type@=loginreq/roomid@=%s/", c.roomId)))
 	if err != nil {
 		return err

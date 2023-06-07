@@ -3,7 +3,8 @@ package message
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thedevsaddam/gojsonq/v2"
+	"github.com/tidwall/gjson"
+	"go-metaverse/tools/bytes"
 )
 
 type (
@@ -46,7 +47,7 @@ type (
 )
 
 func (iw *InteractWord) Parse(body []byte) {
-	data := gojsonq.New().FromString(string(body)).Find("data")
+	data := gjson.Parse(bytes.BytesToString(body)).String()
 	dataJson, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("interface 转 json 错误")

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/andybalholm/brotli"
 	"github.com/dlclark/regexp2"
+	"go-metaverse/models/live/bilibili/api"
 	"go-metaverse/models/live/bilibili/message"
 	"go-metaverse/models/live/constants"
 	"go-metaverse/models/live/models"
@@ -20,13 +21,14 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type AuthParams struct {
 	Uid    int    `json:"uid"`
 	Buvid  string `json:"buvid"`
-	Roomid int    `json:"roomid"`
+	Roomid int32  `json:"roomid"`
 	// 默认3
 	Protover int    `json:"protover"`
 	Platform string `json:"platform"`
@@ -36,29 +38,7 @@ type AuthParams struct {
 	//ClientVer string `json:"clientver"`
 }
 
-type HostList struct {
-	Host    string `json:"host"`
-	Port    int    `json:"port"`
-	WssPort int    `json:"wss_port"`
-	WsPort  int    `json:"ws_port"`
-}
-
-type RoomGroup struct {
-	Group            string     `json:"group"`
-	BusinessID       int        `json:"business_id"`
-	Token            string     `json:"token"`
-	RefreshRowFactor float32    `json:"refresh_row_factor"`
-	RefreshRate      int        `json:"refresh_rate"`
-	MaxDelay         int        `json:"max_delay"`
-	HostList         []HostList `json:"host_list"`
-}
-
-type Response struct {
-	Code    int       `json:"code"`
-	Message string    `json:"message"`
-	TTL     int       `json:"ttl"`
-	Data    RoomGroup `json:"data"`
-}
+var wi api.WebInterface
 
 // Encode 编码数据/**
 /*
@@ -106,7 +86,7 @@ func Encode(wsData string, msgType string) []byte {
 type Client struct {
 	Conn    net.Conn
 	publish *models.Publisher
-	roomId  int
+	roomId  int32
 	domain  string
 	port    string
 }
@@ -148,36 +128,6 @@ type Packet struct {
 	// 保留字段，可以忽略
 	SequenceId uint32
 	Body       []byte
-}
-
-func (p *Packet) Decryption(data []byte) {
-	fmt.Println(p.ProtoVersion, "Proto")
-	switch p.ProtoVersion {
-	case Popularity:
-		fmt.Println("213445")
-		fallthrough
-	case Plain:
-		msg := string(data[:len(data)-1])
-		fmt.Println(msg, "msg4")
-	case Zlib:
-		z, err := zlibParser(data)
-		if err != nil {
-			log.Fatal("zlib error", err)
-		}
-		msg := string(data[:len(z)-1])
-		fmt.Println(msg, "msg3")
-	case Brotli:
-		fmt.Println(data, "partBody")
-		b, err := brotliParser(data)
-		if err != nil {
-			log.Fatal("Brotli error", err)
-		}
-
-		msg := string(data[:len(b)-1])
-		fmt.Println(msg, "msg2")
-	}
-	msg := string(data[:len(data)-1])
-	fmt.Println(msg, "msg1", len(data))
 }
 
 func NewPacket(proto uint16, operation uint32, body []byte) Packet {
@@ -272,11 +222,9 @@ func (c *Client) Watch() {
 		intactBytes := bytes.Join([][]byte{readLengthByte, packetBody}, []byte(""))
 		// 小于16个字节.表示没内容
 		if len(intactBytes) < 16 || len(intactBytes) > 20480 {
-			//fmt.Println("长度不够跳过, 生成string", intactBytes, readLengthByte)
 			continue
 		}
 		for _, pk := range DecodePacket(intactBytes).Parse() {
-
 			c.Handle(pk)
 		}
 	}
@@ -385,12 +333,23 @@ func (c *Client) Handle(pkt Packet) {
 				Rid:  string(rune(c.roomId)),
 				Type: constants.ChatMsgType,
 			}
+			x, err := strconv.ParseInt(dm.UserInfo.UId, 10, 32)
+			if err != nil {
+				// handle error
+			}
+			up := api.UserParams{Token: "", Mid: int32(x), Platform: "web", WebLocation: 1550101}
+			ap := up.GetWrid(wi)
+			uRes := api.GetUserInfo(ap)
+			var iui api.UserInfo
+			userInfoBytes, _ := json.Marshal(uRes.Data)
+			json.Unmarshal(userInfoBytes, &iui)
+			dm.UserInfo.Nn = iui.Name
+			dm.UserInfo.Ic = iui.Face
 			chatMsg := models.ChatMsgMessage{
 				Base:     base,
 				UserInfo: dm.UserInfo,
 				Txt:      dm.Extra.Content,
 			}
-			fmt.Println(chatMsg)
 			c.publish.Publish(chatMsg.GetType(), chatMsg)
 		case string(INTERACT_WORD):
 			iw := new(message.InteractWord)
@@ -432,6 +391,9 @@ func (c *Client) HeartBeat() {
 
 func (c *Client) Connection() error {
 	serverAddr := fmt.Sprintf("%s:%s", c.domain, c.port)
+	response := api.GetWebInterface()
+	data, _ := json.Marshal(response.Data)
+	json.Unmarshal(data, &wi)
 	fmt.Println("serverAddr", serverAddr)
 	tcpServer, err := net.ResolveTCPAddr("tcp", serverAddr)
 	if err != nil {
@@ -472,27 +434,31 @@ func MessageHandle(p *models.Publisher, message string) {
 
 // JoinRoom
 // https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=27848294 获取key以及登录token
-func (c *Client) JoinRoom(roomId int) error {
+func (c *Client) JoinRoom(roomId int32) error {
 	resp, err := http.Get(fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d", roomId))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(resp.Body, "resp")
-	var response Response
+	response := api.GetToken(roomId)
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(response.Data.Token)
 	// 获取token
 	c.roomId = roomId
+
+	var roomGroup api.RoomGroup
+	rgBytes, _ := json.Marshal(response.Data)
+
+	json.Unmarshal(rgBytes, &roomGroup)
+
 	auth := &AuthParams{
 		Roomid:   c.roomId,
 		Uid:      0,
 		Protover: 3,
 		Type:     2,
 		Platform: "web",
-		Key:      response.Data.Token,
+		Key:      roomGroup.Token,
 		//ClientVer: "1.16.3",
 	}
 	data, err := json.Marshal(auth)

@@ -9,7 +9,7 @@ import (
 
 type ClientInterface interface {
 	SendData(bytesData []byte) error
-	JoinRoom(roomId int) error
+	JoinRoom(roomId int32) error
 	Watch()
 	HeartBeat()
 	Connection() error
@@ -52,7 +52,7 @@ func (c *ClientAdapter) HeartBeat() {
 	go c.client.HeartBeat()
 }
 
-func (c *ClientAdapter) JoinRoom(roomId int) error {
+func (c *ClientAdapter) JoinRoom(roomId int32) error {
 	return c.client.JoinRoom(roomId)
 }
 
