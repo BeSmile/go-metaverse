@@ -15,6 +15,7 @@ import (
 var (
 	config   string
 	platform string
+	roomId   int32
 	StartCmd = &cobra.Command{
 		Use:  "lh",
 		Long: `live-help`,
@@ -28,6 +29,7 @@ func init() {
 	StartCmd.PersistentFlags().StringVarP(&config, "config", "c", "config/live.yml", "Start server with provided configuration file")
 
 	StartCmd.PersistentFlags().StringVarP(&platform, "platform", "p", "douyu", "platform")
+	StartCmd.PersistentFlags().Int32VarP(&roomId, "roomId", "r", 13233348, "roomId")
 }
 
 func run() {
@@ -94,7 +96,7 @@ func run() {
 		// b站房间号
 		//client.JoinRoom("27848294")
 		// 撸sir
-		client.JoinRoom(13233348)
+		client.JoinRoom(roomId)
 		client.HeartBeat()
 		client.Watch()
 	}()
