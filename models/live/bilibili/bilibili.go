@@ -118,7 +118,6 @@ func brotliParser(b []byte) ([]byte, error) {
 }
 
 type Packet struct {
-	Packet    []byte
 	PacketLen uint32
 	// 协议版本号 默认2 加密方式
 	ProtoVersion uint16
@@ -138,11 +137,22 @@ func NewPacket(proto uint16, operation uint32, body []byte) Packet {
 	}
 }
 
+func includesInt(slice []int, element int) bool {
+	for _, v := range slice {
+		if v == element {
+			return true
+		}
+	}
+	return false
+}
+
+var UNKNOWS_TYPE = []int{5, 8}
+
 func NewPacketFromBytes(data []byte) Packet {
-	packLen := binary.BigEndian.Uint32(data[0:4])
+	//packLen := binary.BigEndian.Uint32(data[0:4])
 	pv := binary.BigEndian.Uint16(data[6:8])
 	op := binary.BigEndian.Uint32(data[8:12])
-	body := data[16:packLen]
+	body := data[16:]
 	packet := NewPacket(pv, op, body)
 	return packet
 }
@@ -195,7 +205,7 @@ func (p Packet) Parse() []Packet {
 
 func (c *Client) Watch() {
 	for {
-		// 读取消息长度(4字节), b站的packLen包含了整个数据包
+		// 读取消息长度(4字节), b站消息长度包含的是整个数据报
 		readLengthByte := make([]byte, 4)
 		_, err := c.Conn.Read(readLengthByte)
 		if err != nil {
@@ -208,8 +218,8 @@ func (c *Client) Watch() {
 		}
 		// 根据首4个字节,获得body内容长度
 		readLength := binary.BigEndian.Uint32(readLengthByte)
-		// 只读取了前面4个字节,所以需要后面加上12个字节+readLengthByte
-		packetBody := make([]byte, 12+readLength)
+		// 读取了4个 还剩 readLengthByte - 4个
+		packetBody := make([]byte, readLength-4)
 		_, err = c.Conn.Read(packetBody)
 		if err != nil {
 			if err == io.EOF {
@@ -319,6 +329,7 @@ func (c *Client) Handle(pkt Packet) {
 		//var notice Notice
 		//json.Unmarshal(pkt.Body, &notice)
 		CMD := ParseCmd(pkt.Body)
+		fmt.Println("CMD: ", CMD)
 		switch CMD {
 		case string(LINK_INFO_V3_UPDATE):
 			lu := new(message.LinkUp)
