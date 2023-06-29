@@ -3,10 +3,10 @@ package database
 import (
 	"bytes"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql" //加载mysql
-	"github.com/jinzhu/gorm"
 	orm "go-metaverse/global/orm"
 	"go-metaverse/tools/config"
+	"gorm.io/driver/mysql" //加载mysql
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -61,5 +61,5 @@ func (e *Mysql) GetConnect() string {
 }
 
 func (e *Mysql) Open(dbType string, conn string) (db *gorm.DB, err error) {
-	return gorm.Open(dbType, conn)
+	return gorm.Open(mysql.Open(conn), &gorm.Config{})
 }

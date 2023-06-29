@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"go-metaverse/database"
-	"go-metaverse/global/orm"
 	"go-metaverse/models/docker"
 	"go-metaverse/router"
 	"go-metaverse/tools"
@@ -60,12 +59,12 @@ func run() error {
 
 	r := router.InitRouter()
 
-	defer func() {
-		err := orm.DB.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
+	//defer func() {
+	//	err := orm.DB
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+	//}()
 
 	docker.InitCmdBackendEnv()
 

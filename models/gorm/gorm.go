@@ -1,15 +1,17 @@
 package gorm
 
 import (
-	"github.com/jinzhu/gorm"
 	"go-metaverse/models/building"
+	"go-metaverse/models/dictionary"
 	"go-metaverse/models/system"
+	"gorm.io/gorm"
 )
 
 func AutoMigrate(db *gorm.DB) error { // gorm模型自动注入
-	db.SingularTable(true)
+	//db.SingularTable(true)
 	return db.AutoMigrate(
-		new(system.SysUser),
-		new(building.Animal),
-	).Error
+		&system.SysUser{},
+		&building.Animal{},
+		&dictionary.Dictionary{},
+	)
 }

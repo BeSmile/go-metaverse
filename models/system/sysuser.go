@@ -59,7 +59,7 @@ func (user SysUser) Insert() (id int, err error) {
 	if err = user.Encrypt(); err != nil {
 		return
 	}
-	var count int
+	var count int64
 	orm.DB.Table(user.TableName()).Where("username = ? and `delete_time` IS NULL", user.Username).Count(&count)
 	if count > 0 {
 		err = errors.New("账户已存在")
