@@ -50,6 +50,8 @@ func GetExplain(c *gin.Context) {
 
 	if err != nil {
 		log.Fatalln("获取文档失败")
+		app.Error(c, 502, errors.New("获取文档失败"), "")
+		return
 	}
 	defer res.Body.Close()
 

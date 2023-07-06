@@ -58,6 +58,7 @@ func initDockerRouter(g *gin.RouterGroup) {
 func initDictionaryRouter(g *gin.RouterGroup) {
 	dictionaryGroup := g.Group("/dictionary")
 	dictionary.RegisterCambridgeRouter(dictionaryGroup)
+	dictionary.RegisterNoteRouter(dictionaryGroup)
 }
 
 // 配置静态资源目录

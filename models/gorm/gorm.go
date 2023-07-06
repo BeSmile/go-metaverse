@@ -13,5 +13,6 @@ func AutoMigrate(db *gorm.DB) error { // gorm模型自动注入
 		&system.SysUser{},
 		&building.Animal{},
 		&dictionary.Dictionary{},
+		&dictionary.Note{},
 	)
 }
